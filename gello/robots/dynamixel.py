@@ -109,11 +109,14 @@ class DynamixelRobot(Robot):
 
         if self.gripper_open_close is not None:
             # map pos to [0, 1]
-            g_pos = (pos[-1] - self.gripper_open_close[0]) / (
-                self.gripper_open_close[1] - self.gripper_open_close[0]
-            )
-            g_pos = min(max(0, g_pos), 1)
-            pos[-1] = g_pos
+            # g_pos = pos[-1]
+            # g_pos = (pos[-1] - self.gripper_open_close[0]) / (
+            #     self.gripper_open_close[1] - self.gripper_open_close[0]
+            # )
+            # g_pos = min(max(0, g_pos), 1)
+            pos[-1] = 0 if pos[-1] > 2.8 else 1
+            
+            # pos[-1] = g_pos
 
         if self._last_pos is None:
             self._last_pos = pos

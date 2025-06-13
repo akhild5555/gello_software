@@ -8,9 +8,10 @@ from gello.robots.robot import Robot
 class URRobot(Robot):
     """A class representing a UR robot."""
 
-    def __init__(self, robot_ip: str = "192.168.1.10", no_gripper: bool = False):
+    def __init__(self, robot_ip: str = "192.168.1.10", no_gripper: bool = False, no_pinch_gripper: bool = False, pinch_gripper_port: int = 7):
         import rtde_control
         import rtde_receive
+        import rtde_io
 
         [print("in ur robot") for _ in range(4)]
         try:
@@ -20,6 +21,7 @@ class URRobot(Robot):
             print(robot_ip)
 
         self.r_inter = rtde_receive.RTDEReceiveInterface(robot_ip)
+        self.robot_io = rtde_io.RTDEIOInterface(robot_ip)
         if not no_gripper:
             from gello.robots.robotiq_gripper import RobotiqGripper
 
@@ -33,6 +35,8 @@ class URRobot(Robot):
         self._free_drive = False
         self.robot.endFreedriveMode()
         self._use_gripper = not no_gripper
+        self._use_pinch_gripper = not no_pinch_gripper
+        self.pinch_gripper_port = pinch_gripper_port
 
     def num_dofs(self) -> int:
         """Get the number of joints of the robot.
@@ -40,7 +44,7 @@ class URRobot(Robot):
         Returns:
             int: The number of joints of the robot.
         """
-        if self._use_gripper:
+        if self._use_gripper or self._use_pinch_gripper:
             return 7
         return 6
 
@@ -61,6 +65,9 @@ class URRobot(Robot):
         robot_joints = self.r_inter.getActualQ()
         if self._use_gripper:
             gripper_pos = self._get_gripper_pos()
+            pos = np.append(robot_joints, gripper_pos)
+        elif self._use_pinch_gripper:
+            gripper_pos = self.r_inter.getDigitalOutState(self.pinch_gripper_port)
             pos = np.append(robot_joints, gripper_pos)
         else:
             pos = robot_joints
@@ -86,6 +93,9 @@ class URRobot(Robot):
         if self._use_gripper:
             gripper_pos = joint_state[-1] * 255
             self.gripper.move(gripper_pos, 255, 10)
+        if self._use_pinch_gripper:
+            gripper_pos = joint_state[-1]
+            self.robot_io.setStandardDigitalOut(self.pinch_gripper_port, gripper_pos)
         self.robot.waitPeriod(t_start)
 
     def freedrive_enabled(self) -> bool:
@@ -122,7 +132,7 @@ class URRobot(Robot):
 
 
 def main():
-    robot_ip = "192.168.1.11"
+    robot_ip = "192.168.1.121"
     ur = URRobot(robot_ip, no_gripper=True)
     print(ur)
     ur.set_freedrive_mode(True)
