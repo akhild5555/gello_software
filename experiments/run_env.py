@@ -149,7 +149,6 @@ def main(args):
     # going to start position
     print("Going to start position")
     start_pos = agent.act(env.get_obs())
-    # start_pos = start_pos[0:6]
     obs = env.get_obs()
     joints = obs["joint_positions"]
     joints = np.array(joints)
@@ -181,7 +180,6 @@ def main(args):
     for _ in range(25):
         obs = env.get_obs()
         command_joints = agent.act(obs)
-        # command_joints = command_joints[0:6]
         current_joints = obs["joint_positions"]
         current_joints = np.array(current_joints)
         delta = command_joints - current_joints
@@ -193,7 +191,6 @@ def main(args):
     obs = env.get_obs()
     joints = obs["joint_positions"]
     action = agent.act(obs)
-    # action = action[0:6]
     if (action - joints > 0.5).any():
         print("Action is too big")
 
@@ -225,7 +222,6 @@ def main(args):
             flush=True,
         )
         action = agent.act(obs)
-        # action = action[0:6]
         dt = datetime.datetime.now()
         if args.use_save_interface:
             state = kb_interface.update()

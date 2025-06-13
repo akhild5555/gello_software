@@ -122,8 +122,8 @@ class DynamixelRobot(Robot):
             self._last_pos = pos
         else:
             # exponential smoothing
-            pos = self._last_pos * (1 - self._alpha) + pos * self._alpha
-            self._last_pos = pos
+            pos[0:6] = self._last_pos[0:6] * (1 - self._alpha) + pos[0:6] * self._alpha
+            self._last_pos[0:6] = pos[0:6]
 
         return pos
 
