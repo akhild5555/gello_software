@@ -117,7 +117,7 @@ def main(args):
                     )
             if args.start_joints is None:
                 reset_joints = np.deg2rad(
-                    [145, -90, 90, -90, -90, 0, 0]
+                    [-360, -90, 90, -180, -90, 180, 0]
                 )  # Change this to your own reset joints
             else:
                 reset_joints = args.start_joints
